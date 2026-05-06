@@ -1,0 +1,71 @@
+{
+  "scanId": "scan-20260504204925-7a686b",
+  "timestamp": "2026-05-04T20:49:25.054Z",
+  "version": "0.5.0",
+  "repository": {
+    "path": "C:\\Users\\JoshGrossman\\Documents\\VMShares\\WSL\\Work\\aghast-internal\\.worktrees\\course-exercises\\01-simple-semgrep\\advanced\\target",
+    "isGitRepository": true,
+    "branch": "master",
+    "commit": "6be380474f7f47fbff1198870a55183b97684f66"
+  },
+  "issues": [
+    {
+      "checkId": "aghast-insecure-cors",
+      "checkName": "Insecure CORS configuration",
+      "file": "src/admin-api.js",
+      "startLine": 7,
+      "endLine": 7,
+      "description": "`cors()` called with no options — defaults to Access-Control-Allow-Origin: *. Set an explicit allowlist.\n",
+      "codeSnippet": "app.use(cors());",
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "checkId": "aghast-insecure-cors",
+      "checkName": "Insecure CORS configuration",
+      "file": "src/public-api.js",
+      "startLine": 9,
+      "endLine": 9,
+      "description": "CORS configured with `origin: \"*\"`. Replace with an explicit allowlist or a function-based check.\n",
+      "codeSnippet": "app.use(cors({ origin: \"*\", credentials: true }));",
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "checkId": "aghast-insecure-cors",
+      "checkName": "Insecure CORS configuration",
+      "file": "src/reflect-api.js",
+      "startLine": 8,
+      "endLine": 8,
+      "description": "Reflecting `req.headers.origin` straight into Access-Control-Allow-Origin allows any site to be the origin.\n",
+      "codeSnippet": "  res.setHeader(\"Access-Control-Allow-Origin\", req.headers.origin);",
+      "severity": "high",
+      "confidence": "high"
+    }
+  ],
+  "checks": [
+    {
+      "checkId": "aghast-insecure-cors",
+      "checkName": "Insecure CORS configuration",
+      "status": "FAIL",
+      "issuesFound": 3,
+      "executionTime": 2650,
+      "targetsAnalyzed": 3
+    }
+  ],
+  "summary": {
+    "totalChecks": 1,
+    "passedChecks": 0,
+    "failedChecks": 1,
+    "flaggedChecks": 0,
+    "errorChecks": 0,
+    "totalIssues": 3
+  },
+  "executionTime": 2651,
+  "startTime": "2026-05-04T20:49:25.054Z",
+  "endTime": "2026-05-04T20:49:27.705Z",
+  "agentProvider": {
+    "name": "none",
+    "models": []
+  }
+}

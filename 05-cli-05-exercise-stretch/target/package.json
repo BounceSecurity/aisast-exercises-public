@@ -1,0 +1,7 @@
+{
+  "name": "ssrf-target",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express app with mixed safe and unsafe outbound HTTP calls. AGHAST training exercise.",
+  "type": "commonjs"
+}

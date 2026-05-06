@@ -1,0 +1,7 @@
+{
+  "name": "insecure-cors-target",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express app with a mix of safe and unsafe CORS configurations. Course exercise for AGHAST.",
+  "type": "commonjs"
+}

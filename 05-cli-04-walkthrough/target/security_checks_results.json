@@ -1,0 +1,60 @@
+{
+  "scanId": "scan-20260506145238-b87c78",
+  "timestamp": "2026-05-06T14:52:38.440Z",
+  "version": "0.5.0",
+  "repository": {
+    "path": "C:\\Users\\JoshGrossman\\Documents\\VMShares\\WSL\\Work\\aghast-internal\\.worktrees\\course-exercises\\02-complex-semgrep-taint\\walkthrough\\target",
+    "isGitRepository": true,
+    "branch": "master",
+    "commit": "4dc21d6fbe785fc64fe0004d13ccc8d079384a8b"
+  },
+  "issues": [
+    {
+      "checkId": "aghast-flask-sqli-taint",
+      "checkName": "Flask SQL injection (taint flow)",
+      "file": "app/routes/reports.py",
+      "startLine": 21,
+      "endLine": 21,
+      "description": "Flask request data flows into a SQL string passed to `db.execute(...)`. Use bound parameters (`db.execute(sql, (value,))`) instead of string interpolation.\n",
+      "codeSnippet": "    return db.execute(\"SELECT * FROM sales WHERE region = '\" + region + \"'\")",
+      "severity": "critical",
+      "confidence": "high"
+    },
+    {
+      "checkId": "aghast-flask-sqli-taint",
+      "checkName": "Flask SQL injection (taint flow)",
+      "file": "app/routes/users.py",
+      "startLine": 19,
+      "endLine": 19,
+      "description": "Flask request data flows into a SQL string passed to `db.execute(...)`. Use bound parameters (`db.execute(sql, (value,))`) instead of string interpolation.\n",
+      "codeSnippet": "    return db.execute(f\"SELECT * FROM users {where}\")",
+      "severity": "critical",
+      "confidence": "high"
+    }
+  ],
+  "checks": [
+    {
+      "checkId": "aghast-flask-sqli-taint",
+      "checkName": "Flask SQL injection (taint flow)",
+      "status": "FAIL",
+      "issuesFound": 2,
+      "executionTime": 2316,
+      "targetsAnalyzed": 2
+    }
+  ],
+  "summary": {
+    "totalChecks": 1,
+    "passedChecks": 0,
+    "failedChecks": 1,
+    "flaggedChecks": 0,
+    "errorChecks": 0,
+    "totalIssues": 2
+  },
+  "executionTime": 2317,
+  "startTime": "2026-05-06T14:52:38.440Z",
+  "endTime": "2026-05-06T14:52:40.757Z",
+  "agentProvider": {
+    "name": "none",
+    "models": []
+  }
+}

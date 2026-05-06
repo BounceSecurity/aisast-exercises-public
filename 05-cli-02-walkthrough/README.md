@@ -1,4 +1,4 @@
-# Exercise 01 (walkthrough) — Your first Semgrep rule
+# 05-cli-02 (walkthrough) — Your first Semgrep rule in AGHAST
 
 **Goal.** Build an AGHAST `static` check that flags every use of a
 weak hash algorithm (`md5` or `sha1`) in the target codebase.
@@ -116,6 +116,11 @@ solution/
 }
 ```
 
+This is AGHAST's top-level check registry. Each entry has:
+- `id` — must match the check's folder name exactly.
+- `repositories` — which repos this check applies to; an empty array means all repos.
+- `enabled` — set to `false` to disable a check without removing it.
+
 `aghast-weak-hash.json`:
 
 ```json
@@ -132,17 +137,20 @@ solution/
 }
 ```
 
-The check is `static` — Semgrep findings are mapped straight to
-results, no AI runs. That makes it deterministic and free.
+This is the check definition. Key fields:
+- `id` / `name` — machine and human-readable identifiers.
+- `severity` — how serious a finding is (`critical`, `high`, `medium`, `low`).
+- `confidence` — how likely findings are to be real bugs rather than false positives.
+- `checkTarget.type: "static"` — Semgrep findings are mapped straight to results; no AI runs. This makes the check deterministic and free.
+- `checkTarget.discovery: "semgrep"` — tells AGHAST to run Semgrep for discovery.
+- `checkTarget.rules` — path to the Semgrep YAML file, relative to the check folder.
 
 ## Step 5 — Scan
 
-From the `aghast-internal` repo root:
+From the exercise directory:
 
 ```powershell
-node --import tsx src/cli.ts scan `
-  .worktrees/course-exercises/01-simple-semgrep/walkthrough/target `
-  --config-dir .worktrees/course-exercises/01-simple-semgrep/walkthrough/solution
+aghast scan target --config-dir solution
 ```
 
 Expected output: status `FAIL`, with two issues — both pointing at
@@ -161,8 +169,3 @@ Expected output: status `FAIL`, with two issues — both pointing at
   `pattern-inside` or `pattern-either` to also match `bcrypt.hash` /
   `argon2.hash` call sites — see the advanced exercise for that
   flavour.
-
-## Sample solution
-
-Already in `solution/`. Copy `solution/` somewhere else if you want a
-clean slate to write the rule yourself.
