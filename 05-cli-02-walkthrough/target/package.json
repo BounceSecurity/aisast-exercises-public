@@ -1,0 +1,7 @@
+{
+  "name": "weak-hash-target",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tiny Node app used by the AGHAST training course. Contains intentionally weak hashing.",
+  "type": "commonjs"
+}

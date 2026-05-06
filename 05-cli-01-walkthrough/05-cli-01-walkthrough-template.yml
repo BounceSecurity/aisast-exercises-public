@@ -1,0 +1,25 @@
+rules:
+- id: 05-cli-01-walkthrough
+  languages:
+    - py
+  mode: join
+  join:
+    rules:
+      - id: 05-cli-01-walkthrough_source_for_join_mode
+        mode: taint
+        pattern-sources:
+            - pattern: request.args.get(...)
+        pattern-sinks:
+            - pattern: access_url($URL)
+        languages: 
+          - py
+
+      - id: 05-cli-01-walkthrough_sink_for_join_mode
+        pattern: requests.get($URL, ...)
+        languages:
+          - py
+
+    on:
+    - '$CHANGEME'
+  severity: WARNING
+  message: potential SSRF was found

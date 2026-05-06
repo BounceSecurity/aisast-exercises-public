@@ -1,0 +1,25 @@
+rules:
+  - id: 04-rca-04-exercise
+    languages:
+      - javascript
+    mode: taint
+    pattern-sources:
+      - pattern: $QUERY = <... window.location.href ...>
+      - pattern: $QUERY = <... window.location.search ...>
+      - patterns:
+          - pattern: $QUERY = potentiallyDangerous.$PROP
+          - pattern-not-inside: |
+              potentiallyDangerous.selfClean();
+              ...
+    pattern-sanitizers:
+      - by-side-effect: true
+        patterns:
+          - pattern: sanitize($VAR)
+          - focus-metavariable: $VAR
+      - pattern: $VAR.sanitizeToString(...)
+      - pattern: CustomSanitize(...)
+    pattern-sinks:
+      - pattern: document.write('...' + $QUERY + '...');
+    message: Semgrep found reflected xss, an untrusted input is stored in $QUERY and
+      then written to the page
+    severity: WARNING

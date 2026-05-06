@@ -1,0 +1,1 @@
+opengrep --taint-intrafile --test --config ./04-rca-04-exercise.yml ./04-rca-04-exercise.js
