@@ -1,0 +1,11 @@
+{
+  "name": "course-04-walkthrough-target",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Toy Express app with cross-file PII leak. Course exercise 04 walkthrough target.",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.18.0",
+    "axios": "^1.6.0"
+  }
+}

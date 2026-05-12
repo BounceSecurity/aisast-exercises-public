@@ -1,0 +1,9 @@
+{
+  "name": "admin-portal",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "scanId": "scan-20260512053008-cf6128",
+  "timestamp": "2026-05-12T05:30:08.347Z",
+  "version": "0.6.0",
+  "repository": {
+    "path": "C:\\Users\\JoshGrossman\\Documents\\VMShares\\WSL\\Work\\aghast-internal\\.worktrees\\course-exercises\\04-complex-ai\\advanced\\target",
+    "isGitRepository": true,
+    "branch": "master",
+    "commit": "b3f0b378bfd7010b21a830af6d9aca6f53b01ae5"
+  },
+  "issues": [
+    {
+      "checkId": "aghast-privilege-escalation",
+      "checkName": "Privilege escalation via client-controlled role",
+      "file": "routes/team.js",
+      "startLine": 12,
+      "endLine": 22,
+      "description": "## Privilege Escalation: Client-Controlled Role in Team Member Addition\n\nThe POST /team/members endpoint allows any authenticated user to add a team member with a client-supplied role. The handler accepts `req.body.role` directly from the request without verifying that the caller has permission to grant roles.\n\n### Vulnerability Details\n\n- **Line 13**: `validateRole(req.body.role)` accepts the role from the client request\n- **Line 18**: The client-supplied role is stored directly in the database via `db.saveMember()`\n- **No authorization check**: The endpoint has no guard (e.g., `isAdmin(req.user)`) to ensure only admins can add team members\n\nThe `validateRole()` function only validates that the role string is in the allow-list — it does NOT grant permission for the caller to assign that role.\n\n### Attack Scenario\n\nA regular user with role=\"user\" can:\n1. POST to `/team/members` with payload: `{\"email\": \"attacker@example.com\", \"role\": \"admin\"}`\n2. The endpoint accepts this without checking the caller's role\n3. A new admin-level team member is created in the organization\n4. The attacker now has admin privileges in the organization\n\n### Recommendation\n\nGate the endpoint on `req.user.role`:\n\n```javascript\nrouter.post(\"/members\", (req, res) => {\n  // REQUIRED: Check caller is an admin before allowing role assignment\n  if (!isAdmin(req.user)) {\n    return res.status(403).json({ error: \"admin required\" });\n  }\n  \n  const role = validateRole(req.body.role);\n  if (!role) return res.status(400).json({ error: \"invalid role\" });\n\n  const member = db.saveMember(req.user.orgId, {\n    email: req.body.email,\n    role: role,\n    addedBy: req.user.id,\n  });\n  res.status(201).json(member);\n});\n```",
+      "codeSnippet": "router.post(\"/members\", (req, res) => {\n  const role = validateRole(req.body.role);\n  if (!role) return res.status(400).json({ error: \"invalid role\" });\n\n  const member = db.saveMember(req.user.orgId, {\n    email: req.body.email,\n    role: role,\n    addedBy: req.user.id,\n  });\n  res.status(201).json(member);\n});",
+      "severity": "critical",
+      "confidence": "medium",
+      "dataFlow": [
+        {
+          "file": "routes/team.js",
+          "lineNumber": 13,
+          "label": "Client-supplied role from req.body.role"
+        },
+        {
+          "file": "routes/team.js",
+          "lineNumber": 18,
+          "label": "Untrusted role passed to db.saveMember() without privilege check"
+        }
+      ]
+    },
+    {
+      "checkId": "aghast-privilege-escalation",
+      "checkName": "Privilege escalation via client-controlled role",
+      "file": "routes/settings.js",
+      "startLine": 10,
+      "endLine": 16,
+      "description": "## Privilege Escalation: Client-Controlled isAdmin Flag in Workspace Deletion\n\nThe POST /danger-zone/delete-workspace endpoint allows any authenticated user to delete a workspace by providing `req.body.isAdmin` directly from the client request. The handler checks `req.body.isAdmin` (a client-controlled value) instead of verifying the caller's actual role from the JWT.\n\n### Vulnerability Details\n\n- **Line 11**: `if (!req.body.isAdmin)` checks a client-controlled boolean, not the server-side role\n- **No authorization check**: The endpoint has no guard (e.g., `isAdmin(req.user)`) to verify the caller has admin privileges\n- **Privileged operation**: Workspace deletion (line 15) is a sensitive operation that should be restricted\n\n### Attack Scenario\n\nA regular user with role=\"user\" can:\n1. POST to `/settings/danger-zone/delete-workspace` with payload: `{\"isAdmin\": true}`\n2. The endpoint trusts `req.body.isAdmin` and allows the deletion\n3. The entire workspace is deleted from the organization\n4. All data in the organization is lost\n\n### Recommendation\n\nGate the endpoint on `req.user.role` from the JWT:\n\n```javascript\nrouter.post(\"/danger-zone/delete-workspace\", (req, res) => {\n  // REQUIRED: Check caller's actual role from the verified JWT\n  if (!isAdmin(req.user)) {\n    return res.status(403).json({ error: \"admin required\" });\n  }\n  \n  // Pretend this nukes the workspace.\n  res.json({ ok: true, deletedWorkspace: req.user.orgId });\n});\n```\n\nRemove the client-supplied `isAdmin` check entirely.",
+      "codeSnippet": "router.post(\"/danger-zone/delete-workspace\", (req, res) => {\n  if (!req.body.isAdmin) {\n    return res.status(403).json({ error: \"admin required\" });\n  }\n  // Pretend this nukes the workspace.\n  res.json({ ok: true, deletedWorkspace: req.user.orgId });\n});",
+      "severity": "critical",
+      "confidence": "medium",
+      "dataFlow": [
+        {
+          "file": "routes/settings.js",
+          "lineNumber": 11,
+          "label": "Client-supplied isAdmin flag from req.body.isAdmin"
+        },
+        {
+          "file": "routes/settings.js",
+          "lineNumber": 15,
+          "label": "Workspace deletion executed without verifying caller's actual role"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "checkId": "aghast-privilege-escalation",
+      "checkName": "Privilege escalation via client-controlled role",
+      "status": "FAIL",
+      "issuesFound": 2,
+      "executionTime": 55405,
+      "tokenUsage": {
+        "inputTokens": 1741,
+        "outputTokens": 4931,
+        "cacheCreationInputTokens": 17965,
+        "cacheReadInputTokens": 220641,
+        "totalTokens": 6672,
+        "reportedCost": {
+          "amountUsd": 0.07091635,
+          "source": "claude-agent-sdk",
+          "coveredBySubscription": true
+        }
+      }
+    }
+  ],
+  "summary": {
+    "totalChecks": 1,
+    "passedChecks": 0,
+    "failedChecks": 1,
+    "flaggedChecks": 0,
+    "errorChecks": 0,
+    "totalIssues": 2
+  },
+  "executionTime": 55407,
+  "startTime": "2026-05-12T05:30:08.347Z",
+  "endTime": "2026-05-12T05:31:03.754Z",
+  "agentProvider": {
+    "name": "claude-code",
+    "models": [
+      "haiku"
+    ]
+  },
+  "tokenUsage": {
+    "inputTokens": 1741,
+    "outputTokens": 4931,
+    "cacheCreationInputTokens": 17965,
+    "cacheReadInputTokens": 220641,
+    "totalTokens": 6672,
+    "reportedCost": {
+      "amountUsd": 0.07091635,
+      "source": "claude-agent-sdk"
+    }
+  },
+  "metadata": {
+    "cost": {
+      "totalCostUsd": 0.07091635,
+      "currency": "USD"
+    }
+  }
+}

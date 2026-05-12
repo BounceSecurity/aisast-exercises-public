@@ -1,0 +1,11 @@
+{
+  "name": "course-04-advanced-target",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Toy Express app with privilege-escalation bugs. Course exercise 04 advanced target.",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.18.0",
+    "jsonwebtoken": "^9.0.0"
+  }
+}
