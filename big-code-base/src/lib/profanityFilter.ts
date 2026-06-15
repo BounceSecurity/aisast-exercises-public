@@ -1,0 +1,40 @@
+const BLOCKED_WORDS = [
+  "damn",
+  "hell",
+  "crap",
+  "stupid",
+  "idiot",
+  "moron",
+  "jerk",
+  "fool",
+  "dumb",
+  "loser",
+  "buffoon",
+  "nincompoop",
+  "scoundrel",
+  "dimwit",
+  "numbskull",
+  "blockhead",
+  "nitwit",
+  "doofus",
+  "dunce",
+  "twit",
+  "donkey",
+  "knucklehead",
+  "bonehead",
+  "muppet",
+  "weasel",
+  "toad",
+  "gremlin",
+  String.fromCharCode(102, 117, 99, 107),
+  String.fromCharCode(115, 104, 105, 116),
+  String.fromCharCode(99, 117, 110, 116),
+  String.fromCharCode(116, 119, 97, 116),
+  String.fromCharCode(97, 114, 115, 101),
+  String.fromCharCode(100, 105, 99, 107),
+];
+
+export function containsProfanity(input: string): boolean {
+  const lower = input.toLowerCase();
+  return BLOCKED_WORDS.some((word) => lower.includes(word));
+}

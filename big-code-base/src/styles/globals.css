@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  --navy-950: #060e1a;
+  --navy-900: #0a1628;
+  --navy-800: #0f2035;
+  --navy-700: #1a2942;
+  --navy-600: #1e3148;
+  --navy-500: #2a4060;
+  --gold-500: #c9a84c;
+  --gold-400: #d4af37;
+  --gold-300: #e8cc6e;
+  --warm-white: #f0ebe3;
+  --warm-gray: #d4cfc6;
+  --muted: #8899ab;
+  --surface: #132238;
+  --surface-hover: #1a2e47;
+  --coral: #e85d5d;
+  --emerald: #4caf7c;
+}
+
+@theme inline {
+  --color-background: var(--navy-950);
+  --color-foreground: var(--warm-white);
+  --color-navy-950: var(--navy-950);
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+  --color-navy-600: var(--navy-600);
+  --color-navy-500: var(--navy-500);
+  --color-gold-500: var(--gold-500);
+  --color-gold-400: var(--gold-400);
+  --color-gold-300: var(--gold-300);
+  --color-warm-white: var(--warm-white);
+  --color-warm-gray: var(--warm-gray);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-coral: var(--coral);
+  --color-emerald: var(--emerald);
+  --font-display: "DM Serif Display", Georgia, serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+}
+
+body {
+  background: var(--navy-950);
+  color: var(--warm-white);
+  font-family: var(--font-body);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.4s ease-out forwards;
+}
+
+.gold-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-500), transparent);
+}
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px;
+  z-index: 50;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--warm-white) !important;
+}
