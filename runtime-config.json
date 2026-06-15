@@ -1,0 +1,6 @@
+{
+  "agentProvider": {
+    "name": "opencode",
+    "model": "opencode/nemotron-3-ultra-free"
+  }
+}
