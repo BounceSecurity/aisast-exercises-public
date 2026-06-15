@@ -1,0 +1,11 @@
+{
+  "checks": [
+    {
+      "id": "aghast-importantvalidations-mc",
+      "repositories": [
+        "codebase/"
+      ],
+      "enabled": true
+    }
+  ]
+}

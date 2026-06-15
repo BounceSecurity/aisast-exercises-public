@@ -1,0 +1,1 @@
+aghast scan ./codebase --config-dir . --output-format sarif --output ./codebase/results-test.sarif --runtime-config ../runtime-config.json
