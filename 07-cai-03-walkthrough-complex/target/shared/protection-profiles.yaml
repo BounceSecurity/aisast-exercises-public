@@ -1,0 +1,40 @@
+profiles:
+  internal-standard:
+    ip_allowlist:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+    basic_auth:
+      realm: internal
+
+  internal-strict:
+    ip_allowlist:
+      - 10.0.0.0/8
+    oidc:
+      provider: corporate
+      required_groups:
+        - engineering
+    basic_auth:
+      realm: internal
+
+  partner-access:
+    oidc:
+      provider: partner
+    ip_allowlist:
+      - 10.0.0.0/8
+      - 203.0.113.0/24
+
+  internet-facing:
+    oidc:
+      provider: corporate
+      required_groups:
+        - engineering
+    ip_allowlist:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+    mtls:
+      ca_cert: /etc/ssl/certs/client-ca.pem
+      verify_depth: 2
+
+  monitoring-basic:
+    ip_allowlist:
+      - 10.0.0.0/8

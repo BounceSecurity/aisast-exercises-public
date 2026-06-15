@@ -1,0 +1,40 @@
+servers:
+  - server_name: admin.example.com
+    environment: production
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/admin.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/admin.example.com.key
+    upstream: admin-backend
+    protection:
+      oidc:
+        provider: corporate
+        required_groups:
+          - admin
+          - platform-ops
+      ip_allowlist:
+        - 10.10.0.0/16
+    locations:
+      - path: /
+        proxy_pass: http://admin-backend:5000
+
+  - server_name: admin-staging.internal.example.com
+    environment: staging
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/wildcard.internal.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/wildcard.internal.example.com.key
+    upstream: admin-staging-backend
+    protection:
+      ip_allowlist:
+        - 10.10.0.0/16
+        - 172.16.0.0/12
+      oidc:
+        provider: corporate
+        required_groups:
+          - admin
+      basic_auth:
+        realm: internal
+    locations:
+      - path: /
+        proxy_pass: http://admin-staging-backend:5000

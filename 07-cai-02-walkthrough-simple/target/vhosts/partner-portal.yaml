@@ -1,0 +1,46 @@
+servers:
+  - server_name: partners.example.com
+    environment: production
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/partners.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/partners.example.com.key
+    upstream: partner-portal
+    protection:
+      oidc:
+        provider: partner
+    locations:
+      - path: /
+        proxy_pass: http://partner-portal:8080
+      - path: /api
+        proxy_pass: http://partner-api:8081
+
+  - server_name: partners-sandbox.internal.example.com
+    environment: sandbox
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/wildcard.internal.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/wildcard.internal.example.com.key
+    upstream: partner-sandbox
+    protection:
+      oidc:
+        provider: partner
+      ip_allowlist:
+        - 10.0.0.0/8
+        - 203.0.113.0/24
+    locations:
+      - path: /
+        proxy_pass: http://partner-sandbox:8080
+      - path: /api
+        proxy_pass: http://partner-sandbox-api:8081
+
+  - server_name: partners-dev.internal.example.com
+    environment: development
+    listen: 8443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/wildcard.internal.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/wildcard.internal.example.com.key
+    upstream: partner-dev
+    locations:
+      - path: /
+        proxy_pass: http://partner-dev:8080

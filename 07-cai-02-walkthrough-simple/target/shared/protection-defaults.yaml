@@ -1,0 +1,23 @@
+default_ip_allowlist:
+  - 10.0.0.0/8
+  - 172.16.0.0/12
+  - 192.168.0.0/16
+
+oidc_providers:
+  corporate:
+    issuer: https://auth.corp.example.com
+    client_id: nginx-proxy
+    scopes:
+      - openid
+      - profile
+  partner:
+    issuer: https://partner-auth.example.com
+    client_id: partner-proxy
+    scopes:
+      - openid
+
+basic_auth_realms:
+  internal:
+    htpasswd_file: /etc/nginx/htpasswd/internal
+  service:
+    htpasswd_file: /etc/nginx/htpasswd/service-accounts

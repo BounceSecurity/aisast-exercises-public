@@ -1,0 +1,48 @@
+servers:
+  - server_name: payments.example.com
+    environment: production
+    exposure: internet
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/payments.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/payments.example.com.key
+    upstream: payments-backend
+    locations:
+      - path: /
+        proxy_pass: http://payments-backend:9000
+      - path: /webhooks
+        proxy_pass: http://payments-webhooks:9001
+    rate_limit:
+      requests_per_second: 30
+      burst: 10
+    headers:
+      Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+
+  - server_name: payments-staging.external.example.com
+    environment: staging
+    exposure: internet
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/wildcard.external.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/wildcard.external.example.com.key
+    upstream: payments-staging
+    protection:
+      profile: internet-facing
+    locations:
+      - path: /
+        proxy_pass: http://payments-staging:9000
+
+  - server_name: payments-uat.internal.example.com
+    environment: uat
+    exposure: internal
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/wildcard.internal.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/wildcard.internal.example.com.key
+    upstream: payments-uat
+    locations:
+      - path: /
+        proxy_pass: http://payments-uat:9000
+    rate_limit:
+      requests_per_second: 20
+      burst: 5

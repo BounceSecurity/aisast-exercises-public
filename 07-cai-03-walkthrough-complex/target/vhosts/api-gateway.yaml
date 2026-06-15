@@ -1,0 +1,46 @@
+servers:
+  - server_name: api.example.com
+    environment: production
+    exposure: internet
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/api.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/api.example.com.key
+    upstream: api-backend
+    locations:
+      - path: /
+        proxy_pass: http://api-backend:8080
+    rate_limit:
+      requests_per_second: 100
+      burst: 50
+
+  - server_name: api-staging.internal.example.com
+    environment: staging
+    exposure: internal
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/wildcard.internal.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/wildcard.internal.example.com.key
+    upstream: api-staging-backend
+    protection:
+      profile: internal-strict
+    locations:
+      - path: /
+        proxy_pass: http://api-staging-backend:8080
+    rate_limit:
+      requests_per_second: 50
+      burst: 25
+
+  - server_name: api-dev.internal.example.com
+    environment: development
+    exposure: internal
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/wildcard.internal.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/wildcard.internal.example.com.key
+    upstream: api-dev-backend
+    protection:
+      profile: internal-standard
+    locations:
+      - path: /
+        proxy_pass: http://api-dev-backend:8080

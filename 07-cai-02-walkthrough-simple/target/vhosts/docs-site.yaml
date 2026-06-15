@@ -1,0 +1,32 @@
+servers:
+  - server_name: docs.example.com
+    environment: production
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/docs.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/docs.example.com.key
+    upstream: docs-static
+    locations:
+      - path: /
+        proxy_pass: http://docs-static:80
+    cache:
+      enabled: true
+      ttl: 3600
+
+  - server_name: docs-preview.internal.example.com
+    environment: preview
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/wildcard.internal.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/wildcard.internal.example.com.key
+    upstream: docs-preview
+    protection:
+      basic_auth:
+        realm: internal
+      oidc:
+        provider: corporate
+        required_groups:
+          - engineering
+    locations:
+      - path: /
+        proxy_pass: http://docs-preview:80

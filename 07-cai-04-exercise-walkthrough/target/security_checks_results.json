@@ -1,0 +1,167 @@
+{
+  "scanId": "scan-20260512053709-e3943b",
+  "timestamp": "2026-05-12T05:37:09.438Z",
+  "version": "0.6.0",
+  "repository": {
+    "path": "C:\\Users\\JoshGrossman\\Documents\\VMShares\\WSL\\Work\\aghast-internal\\.worktrees\\course-exercises\\05-hybrid-semgrep-ai\\walkthrough\\target",
+    "isGitRepository": true,
+    "branch": "master",
+    "commit": "97a0004da7ba7e562ca0bbf483ac258e4199c42f"
+  },
+  "issues": [
+    {
+      "checkId": "aghast-payment-input-validation",
+      "checkName": "Express handler calls paymentApi.charge without validating input",
+      "file": "src/routes/donate-bad.js",
+      "startLine": 10,
+      "endLine": 14,
+      "description": "## Missing input validation in POST /donate\n\nThe `paymentApi.charge()` call on lines 10-14 receives three fields derived from the request body without proper validation:\n\n### Unvalidated Fields\n\n- **amount** (line 11): Derived from `req.body.amount` via `parseFloat()` on line 9. The `parseFloat()` coercion is NOT validation—it silently converts undefined, malformed strings, and non-numeric values to NaN or Infinity, which should not reach a payment API. No explicit type check, range check, or `Number.isFinite()` call guards this field.\n\n- **currency** (line 12): Directly from `req.body.currency` with no validation. No type check, allowlist, regex, or enum membership test confirms this is a valid currency code (e.g., USD, EUR).\n\n- **customerId** (line 13): Directly from `req.body.customerId` with no validation. No type check or format check ensures this is a valid customer identifier.\n\n### Attack Scenario\n\n1. Attacker sends `POST /donate` with `{ \"amount\": \"NaN\", \"currency\": \"FAKE\", \"customerId\": \"'; DROP TABLE customers; --\" }`\n2. `parseFloat(\"NaN\")` returns `NaN`; currency and customerId are passed as-is\n3. The handler calls `paymentApi.charge({ amount: NaN, currency: \"FAKE\", customerId: \"'; DROP TABLE customers; --\" })`\n4. Depending on the payment API's implementation, this could:\n   - Charge an invalid amount\n   - Charge in an unrecognized currency\n   - Exploit the customerId field if the backend uses it in an unparameterized query\n\n### Recommendation\n\nAdd explicit validation in this handler before the `paymentApi.charge()` call:\n\n```javascript\nrouter.post(\"/donate\", async (req, res) => {\n  // Validate amount: must be a number, finite, and positive\n  const amount = parseFloat(req.body.amount);\n  if (!Number.isFinite(amount) || amount <= 0 || amount > 10000) {\n    return res.status(400).json({ error: \"Invalid amount\" });\n  }\n\n  // Validate currency: must be in an allowlist\n  const VALID_CURRENCIES = [\"USD\", \"EUR\", \"GBP\"];\n  const currency = req.body.currency;\n  if (typeof currency !== \"string\" || !VALID_CURRENCIES.includes(currency)) {\n    return res.status(400).json({ error: \"Invalid currency\" });\n  }\n\n  // Validate customerId: must be a non-empty string\n  const customerId = req.body.customerId;\n  if (typeof customerId !== \"string\" || customerId.trim().length === 0) {\n    return res.status(400).json({ error: \"Invalid customer ID\" });\n  }\n\n  const result = await paymentApi.charge({ amount, currency, customerId });\n  res.json(result);\n});\n```",
+      "codeSnippet": "  const result = await paymentApi.charge({\n    amount,\n    currency: req.body.currency,\n    customerId: req.body.customerId,\n  });",
+      "severity": "high",
+      "confidence": "medium",
+      "dataFlow": [
+        {
+          "file": "src/routes/donate-bad.js",
+          "lineNumber": 9,
+          "label": "amount extracted from req.body.amount and coerced via parseFloat()"
+        },
+        {
+          "file": "src/routes/donate-bad.js",
+          "lineNumber": 12,
+          "label": "currency extracted directly from req.body.currency (no validation)"
+        },
+        {
+          "file": "src/routes/donate-bad.js",
+          "lineNumber": 13,
+          "label": "customerId extracted directly from req.body.customerId (no validation)"
+        },
+        {
+          "file": "src/routes/donate-bad.js",
+          "lineNumber": 10,
+          "label": "All three fields passed to paymentApi.charge() without explicit type/range/allowlist validation"
+        }
+      ]
+    },
+    {
+      "checkId": "aghast-payment-input-validation",
+      "checkName": "Express handler calls paymentApi.charge without validating input",
+      "file": "src/routes/refund-bad.js",
+      "startLine": 9,
+      "endLine": 14,
+      "description": "## Missing validation in POST /refund\n\nThe `paymentApi.charge()` call receives three unvalidated fields from the request body:\n- `amount` (derived from `req.body.amount`)\n- `currency` (derived from `req.body.currency`)\n- `customerId` (derived from `req.body.customerId`)\n\nNone of these fields are validated before being passed to the billing system. Simply negating the amount with `-` does not constitute validation.\n\n### Issues per field:\n\n**amount**: No type check, range check, or finiteness check. An attacker can:\n- Send a non-numeric value (string, object, null, undefined) → after negation becomes NaN or 0\n- Send a very large number → negation creates a very large charge\n- Send Infinity → negation may behave unexpectedly\n\n**currency**: No allowlist, enum check, or format validation. An attacker can:\n- Send invalid currency codes (e.g., \"XXX\", \"malicious\")\n- Send null or undefined → may bypass downstream validation\n- Send special characters or excessively long strings\n\n**customerId**: No type check, length check, or format validation. An attacker can:\n- Send arbitrary customer IDs to charge the wrong account\n- Send null/undefined → may default to a specific customer or raise an unhandled error\n- Send extremely long strings to trigger buffer issues\n\n### Attack Scenario:\n\nAn attacker sends:\n```json\nPOST /refund\n{\n  \"amount\": 999999,\n  \"currency\": \"USD\",\n  \"customerId\": \"attacker-target-id\"\n}\n```\n\nWith no validation, this charges $999,999 to the target customer account, directly impacting the billing system.\n\n### Recommendation:\n\nAdd explicit validation before the `paymentApi.charge()` call:\n\n```js\nrouter.post(\"/refund\", async (req, res) => {\n  // Validate amount\n  const amount = parseFloat(req.body.amount);\n  if (!Number.isFinite(amount) || amount <= 0 || amount > 999999) {\n    return res.status(400).json({ error: \"Invalid amount\" });\n  }\n\n  // Validate currency (allowlist)\n  const VALID_CURRENCIES = [\"USD\", \"EUR\", \"GBP\"];\n  if (!VALID_CURRENCIES.includes(req.body.currency)) {\n    return res.status(400).json({ error: \"Invalid currency\" });\n  }\n\n  // Validate customerId\n  const customerId = req.body.customerId;\n  if (typeof customerId !== \"string\" || customerId.length === 0 || customerId.length > 100) {\n    return res.status(400).json({ error: \"Invalid customerId\" });\n  }\n\n  const result = await paymentApi.charge({\n    amount: -amount,\n    currency: req.body.currency,\n    customerId: customerId,\n    note: \"refund\",\n  });\n  res.json(result);\n});\n```",
+      "codeSnippet": "  const result = await paymentApi.charge({\n    amount: -req.body.amount,\n    currency: req.body.currency,\n    customerId: req.body.customerId,\n    note: \"refund\",\n  });",
+      "severity": "high",
+      "confidence": "medium",
+      "dataFlow": [
+        {
+          "file": "src/routes/refund-bad.js",
+          "lineNumber": 8,
+          "label": "POST /refund handler receives request"
+        },
+        {
+          "file": "src/routes/refund-bad.js",
+          "lineNumber": 10,
+          "label": "req.body.amount extracted without validation"
+        },
+        {
+          "file": "src/routes/refund-bad.js",
+          "lineNumber": 11,
+          "label": "req.body.currency extracted without validation"
+        },
+        {
+          "file": "src/routes/refund-bad.js",
+          "lineNumber": 12,
+          "label": "req.body.customerId extracted without validation"
+        },
+        {
+          "file": "src/routes/refund-bad.js",
+          "lineNumber": 9,
+          "label": "All unvalidated fields passed to paymentApi.charge() — hits billing system"
+        }
+      ]
+    },
+    {
+      "checkId": "aghast-payment-input-validation",
+      "checkName": "Express handler calls paymentApi.charge without validating input",
+      "file": "src/routes/topup-bad.js",
+      "startLine": 9,
+      "endLine": 9,
+      "description": "## Missing validation in POST /topup\n\nThe handler passes `req.body` directly to `paymentApi.charge()` without any validation. Because `paymentApi.charge()` interacts with a real billing system, every field in the request body MUST be explicitly validated before the charge call.\n\n### Unvalidated Fields\n- **All fields in `req.body`** — No type, range, length, or allowlist checks are performed\n- The request could contain any structure, with no validation that it matches expected fields (e.g., amount, currency, accountId)\n- Type coercion is not performed (e.g., `Number(req.body.amount)` was not called, so malformed values pass through)\n\n### Why console.log is Insufficient\nLine 8 logs the input (`console.log(\"topup request\", req.body)`) but this does not validate it — logging and validating are distinct operations. The log statement does not prevent malformed, negative, or oversized requests from reaching the billing system.\n\n### Attack Scenario\nAn attacker sends:\n```json\nPOST /topup\nContent-Type: application/json\n\n{ \"amount\": -1000, \"currency\": null, \"extraField\": \"malicious\" }\n```\nWith no validation:\n- Negative amounts could be passed to the billing system\n- Null/undefined fields could cause unexpected behavior\n- Extra fields could be interpreted by the payment processor\n- The handler assumes the correct structure but enforces nothing\n\n### Recommendation\nAdd explicit validation before line 9:\n1. **Check request body exists and is an object:**\n   ```javascript\n   if (!req.body || typeof req.body !== 'object')\n     return res.status(400).json({ error: 'Invalid request body' });\n   ```\n2. **Validate each field individually:**\n   - `amount`: must be a positive number and finite (`typeof amount === 'number' && amount > 0 && Number.isFinite(amount)`)\n   - `currency`: must be a non-empty string matching ISO 4217 (`typeof currency === 'string' && /^[A-Z]{3}$/.test(currency)`)\n   - Only allow whitelisted fields; reject unexpected fields\n3. **Use a schema validator** (e.g., Zod, Joi, Yup) to define and enforce the expected structure once\n\nEvery field derived from `req.body` must pass an explicit check before reaching `paymentApi.charge()`.",
+      "codeSnippet": "  const result = await paymentApi.charge(req.body);",
+      "severity": "high",
+      "confidence": "medium",
+      "dataFlow": [
+        {
+          "file": "src/routes/topup-bad.js",
+          "lineNumber": 7,
+          "label": "POST /topup route handler receives request"
+        },
+        {
+          "file": "src/routes/topup-bad.js",
+          "lineNumber": 8,
+          "label": "req.body is logged but NOT validated"
+        },
+        {
+          "file": "src/routes/topup-bad.js",
+          "lineNumber": 9,
+          "label": "Unvalidated req.body passed directly to paymentApi.charge() which hits real billing system"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "checkId": "aghast-payment-input-validation",
+      "checkName": "Express handler calls paymentApi.charge without validating input",
+      "status": "FAIL",
+      "issuesFound": 3,
+      "executionTime": 30946,
+      "targetsAnalyzed": 5,
+      "tokenUsage": {
+        "inputTokens": 9770,
+        "outputTokens": 11428,
+        "cacheCreationInputTokens": 194987,
+        "cacheReadInputTokens": 483474,
+        "totalTokens": 21198,
+        "reportedCost": {
+          "amountUsd": 0.3589911499999999,
+          "source": "claude-agent-sdk"
+        }
+      }
+    }
+  ],
+  "summary": {
+    "totalChecks": 1,
+    "passedChecks": 0,
+    "failedChecks": 1,
+    "flaggedChecks": 0,
+    "errorChecks": 0,
+    "totalIssues": 3
+  },
+  "executionTime": 30947,
+  "startTime": "2026-05-12T05:37:09.438Z",
+  "endTime": "2026-05-12T05:37:40.385Z",
+  "agentProvider": {
+    "name": "claude-code",
+    "models": [
+      "haiku"
+    ]
+  },
+  "tokenUsage": {
+    "inputTokens": 9770,
+    "outputTokens": 11428,
+    "cacheCreationInputTokens": 194987,
+    "cacheReadInputTokens": 483474,
+    "totalTokens": 21198,
+    "reportedCost": {
+      "amountUsd": 0.3589911499999999,
+      "source": "claude-agent-sdk"
+    }
+  },
+  "metadata": {
+    "cost": {
+      "totalCostUsd": 0.35899115,
+      "currency": "USD"
+    }
+  }
+}

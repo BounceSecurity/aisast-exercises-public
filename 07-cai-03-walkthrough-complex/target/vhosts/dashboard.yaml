@@ -1,0 +1,56 @@
+servers:
+  - server_name: dashboard.example.com
+    environment: production
+    exposure: internet
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/dashboard.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/dashboard.example.com.key
+    upstream: dashboard-web
+    locations:
+      - path: /
+        proxy_pass: http://dashboard-web:3000
+      - path: /api
+        proxy_pass: http://dashboard-api:4000
+    headers:
+      X-Frame-Options: DENY
+      Content-Security-Policy: "default-src 'self'"
+
+  - server_name: dashboard-staging.external.example.com
+    environment: staging
+    exposure: internet
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/wildcard.external.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/wildcard.external.example.com.key
+    upstream: dashboard-staging-web
+    protection:
+      oidc:
+        provider: corporate
+        required_groups:
+          - product
+          - engineering
+      ip_allowlist:
+        - 10.0.0.0/8
+        - 198.51.100.0/24
+    locations:
+      - path: /
+        proxy_pass: http://dashboard-staging-web:3000
+      - path: /api
+        proxy_pass: http://dashboard-staging-api:4000
+    headers:
+      X-Frame-Options: DENY
+
+  - server_name: dashboard-dev.internal.example.com
+    environment: development
+    exposure: internal
+    listen: 443
+    ssl: true
+    ssl_certificate: /etc/ssl/certs/wildcard.internal.example.com.pem
+    ssl_certificate_key: /etc/ssl/private/wildcard.internal.example.com.key
+    upstream: dashboard-dev-web
+    protection:
+      profile: monitoring-basic
+    locations:
+      - path: /
+        proxy_pass: http://dashboard-dev-web:3000
