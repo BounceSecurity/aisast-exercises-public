@@ -117,12 +117,10 @@ for the full prompt — under 40 lines, deliberately. Long prompts drift.
 
 ## Step 5 — Run the scan
 
-From the repo root (`aghast-internal`):
+From inside the exercise folder:
 
 ```powershell
-node --import tsx src/cli.ts scan `
-  .worktrees/course-exercises/05-hybrid-semgrep-ai/walkthrough/target `
-  --config-dir .worktrees/course-exercises/05-hybrid-semgrep-ai/walkthrough/solution
+aghast scan target --config-dir solution
 ```
 
 This takes 1–3 minutes — there are 5 Semgrep matches and the AI runs

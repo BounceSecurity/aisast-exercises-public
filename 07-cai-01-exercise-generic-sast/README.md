@@ -121,17 +121,16 @@ model with `ANTHROPIC_API_KEY` set, a local Claude, or an OpenCode
 provider). The AGHAST docs → **Configuration Reference** has the full
 runtime-config schema.
 
-Then run from the `aghast-internal` repo root (where `src/cli.ts` lives),
-pointing the scan at the target, `--config-dir` at your solution, and
+Then run from inside the `07-cai-01-exercise-generic-sast` folder, pointing
+the scan at the shared `big-code-base`, `--config-dir` at your solution, and
 `--runtime-config` at the file you just edited:
 
 ```powershell
-node --import tsx src/cli.ts scan `
-  ..\aisast-exercises\big-code-base `
-  --config-dir ..\aisast-exercises\07-cai-01-exercise-generic-sast\solution `
-  --runtime-config ..\aisast-exercises\runtime-config.json `
+aghast scan ../big-code-base `
+  --config-dir solution `
+  --runtime-config ../runtime-config.json `
   --output-format sarif `
-  --output ..\aisast-exercises\07-cai-01-exercise-generic-sast\results.sarif
+  --output results.sarif
 ```
 
 Add `--debug` to watch discovery (`target 1/15`, `2/15`, …) and see the

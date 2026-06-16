@@ -135,12 +135,10 @@ sends the whole repo to the AI plus the markdown above.
 
 ## Step 5 — Scan
 
-From the `aghast-internal` repo root (`ANTHROPIC_API_KEY` must be set):
+From inside the exercise folder (`ANTHROPIC_API_KEY` must be set):
 
 ```powershell
-node --import tsx src/cli.ts scan `
-  .worktrees/course-exercises/04-complex-ai/walkthrough/target `
-  --config-dir .worktrees/course-exercises/04-complex-ai/walkthrough/solution
+aghast scan target --config-dir solution
 ```
 
 Expect: status `FAIL`, exactly two issues, both in the `routes/`

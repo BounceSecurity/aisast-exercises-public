@@ -205,12 +205,10 @@ evolves.
 
 ## Step 4 — Scan
 
-From the `aghast-internal` repo root:
+From inside the exercise folder:
 
 ```powershell
-node --import tsx src/cli.ts scan `
-  ..\aisast-exercises\07-cai-03-walkthrough-complex\target `
-  --config-dir ..\aisast-exercises\07-cai-03-walkthrough-complex\solution
+aghast scan target --config-dir solution
 ```
 
 The static check needs no API key. The `-complex-mc` check calls the

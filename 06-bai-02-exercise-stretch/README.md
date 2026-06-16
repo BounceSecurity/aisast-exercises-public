@@ -49,12 +49,10 @@ do skim `src/audit.js` to know what an audit call looks like.
 
 ## Done when...
 
-Running:
+Running, from inside the exercise folder:
 
 ```powershell
-node --import tsx src/cli.ts scan `
-  .worktrees/course-exercises/03-simple-ai/advanced/target `
-  --config-dir .worktrees/course-exercises/03-simple-ai/advanced/<your-solution-dir>
+aghast scan target --config-dir <your-solution-dir>
 ```
 
 ...reports `FAIL` with **exactly three issues**, one for each of:

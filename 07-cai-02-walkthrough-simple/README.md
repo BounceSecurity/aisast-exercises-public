@@ -247,12 +247,10 @@ FAIL for that server. 12 targets analysed, 6 come back FAIL.
 
 ## Step 4 — Scan
 
-From the `aghast-internal` repo root:
+From inside the exercise folder:
 
 ```powershell
-node --import tsx src/cli.ts scan `
-  ..\aisast-exercises\07-cai-02-walkthrough-simple\target `
-  --config-dir ..\aisast-exercises\07-cai-02-walkthrough-simple\solution
+aghast scan target --config-dir solution
 ```
 
 The static check needs no API key. The `-mc` check calls the AI, so

@@ -157,12 +157,10 @@ routes that are NOT guarded.
 
 ## Step 4 — Scan
 
-From the `aghast-internal` repo root:
+From inside the exercise folder:
 
 ```powershell
-node --import tsx src/cli.ts scan `
-  .worktrees/course-exercises/03-simple-ai/walkthrough/target `
-  --config-dir .worktrees/course-exercises/03-simple-ai/walkthrough/solution
+aghast scan target --config-dir solution
 ```
 
 The scan takes 20-90s — the AI is reading the whole target. When it

@@ -1,18 +1,54 @@
-# 05-cli-06 (walkthrough) — Semgrep finds, the AI traces the call chain
+# 05-cli-06 (walkthrough) — Hybrid Semgrep + AI: provider smoke test
 
-**Goal.** Build a `targeted` AGHAST check over a small Python AI-gateway
-service. A permissive Semgrep rule finds every route handler that
-dispatches a query to the AI backend; the AI is then invoked once per
-handler to verify that **all four** required validations run *before* the
-query is sent — following the call chain through helper functions.
+**Goal.** Confirm your AI provider is wired up correctly by running a
+**pre-built** hybrid check: a permissive Semgrep rule finds candidate route
+handlers, and the AI judges each one. You don't need to understand the
+check — you need it to run end-to-end and produce **2 findings from 3
+targets**.
 
-This is the AI half of the hybrid pattern (compare `07-cai-04`), applied
-to a policy that needs cross-function reasoning Semgrep can't do alone.
+## Step 1 — Configure your provider and run
 
-You'll know you're done when `aghast scan` reports `FAIL`, flagging the two
-handlers that skip validations and passing the one that does them all.
+The check calls the AI once per handler, so it needs a working provider.
+Configure yours in the root `../runtime-config.json` (see the course slides
+and the top-level README). Then, from inside the
+`05-cli-06-exercise-walkthrough` folder, run the provided script:
 
-## Step 0 — Look at the target
+```
+./run.sh      # macOS / Linux / WSL
+run.bat       # Windows
+```
+
+You should get **2 findings from 3 targets** (the table in Step 2). The
+scripts also write a SARIF report to `codebase/results-test.sarif`.
+
+If something looks wrong, run the same scan with `--debug` to see the full
+AI prompt and Semgrep invocation:
+
+```powershell
+aghast scan codebase `
+  --config-dir . `
+  --runtime-config ../runtime-config.json `
+  --debug
+```
+
+## Step 2 — What to expect
+
+Three handlers are found; the AI judges each by tracing its call chain:
+
+| Endpoint | Role | Length | Hours | Malicious | Verdict |
+|---|:--:|:--:|:--:|:--:|---|
+| `/api/v1/submit` | ✓ | ✓ | ✓ | ✓ | **PASS** |
+| `/api/v1/execute` | ✓ | ✗ | ✓ | ✓ | **FAIL** — no length check |
+| `/api/v1/run` | ✗ | ✓ | ✗ | ✗ | **FAIL** — only length check |
+
+Overall `FAIL`, two issues — each located at the failing route handler and
+listing the missing validations.
+
+## What's actually happening (optional)
+
+You don't need this to complete the exercise, but here's how the check works.
+
+The files:
 
 ```
 codebase/
@@ -42,8 +78,6 @@ The policy: before calling `send_ai_query(query)`, a handler must perform
 
 Missing even one is a FAIL.
 
-## Step 1 — The two halves
-
 **Semgrep (the easy half).** The rule matches any function that calls the
 sink:
 
@@ -66,36 +100,7 @@ the prompt in the `.md`. The prompt tells it to trace from the route
 handler through `auth.py` / `ai_service.py` and confirm all four
 validations precede the query.
 
-## Step 2 — Configure your model and run
-
-This check calls the AI once per handler, so supply your own model in
-`../runtime-config.json` (see the top-level README). Then, from the
-`aghast-internal` repo root:
-
-```powershell
-node --import tsx src/cli.ts scan `
-  ..\aisast-exercises\05-cli-06-exercise-walkthrough\codebase `
-  --config-dir ..\aisast-exercises\05-cli-06-exercise-walkthrough `
-  --runtime-config ..\aisast-exercises\runtime-config.json
-```
-
-(The provided `run.sh` / `run.bat` do the same and write a SARIF report to
-`codebase/results-test.sarif`.)
-
-## Step 3 — What to expect
-
-Three handlers are found; the AI judges each by tracing its call chain:
-
-| Endpoint | Role | Length | Hours | Malicious | Verdict |
-|---|:--:|:--:|:--:|:--:|---|
-| `/api/v1/submit` | ✓ | ✓ | ✓ | ✓ | **PASS** |
-| `/api/v1/execute` | ✓ | ✗ | ✓ | ✓ | **FAIL** — no length check |
-| `/api/v1/run` | ✗ | ✓ | ✗ | ✗ | **FAIL** — only length check |
-
-Overall `FAIL`, two issues — each located at the failing route handler and
-listing the missing validations.
-
-## Discussion
+**Notes.**
 
 - **Why not pure Semgrep?** "All four checks ran before the sink, in any
   order, some via decorators, some via helper calls" is a counting +

@@ -39,12 +39,10 @@ cross-file reasoning can tell them apart.
 
 ## Done when…
 
-Running:
+Running, from inside the exercise folder:
 
 ```powershell
-node --import tsx src/cli.ts scan `
-  .worktrees/course-exercises/04-complex-ai/advanced/target `
-  --config-dir .worktrees/course-exercises/04-complex-ai/advanced/solution
+aghast scan target --config-dir solution
 ```
 
 reports **status `FAIL`** with issues in **`routes/team.js`** AND
