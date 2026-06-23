@@ -210,6 +210,7 @@ From inside the exercise folder:
 ```powershell
 aghast scan target --config-dir solution
 ```
+If you set your AI provider in the runtime-config.json file you need to add `--runtime-config <path-to-runtime-config.json>` to your command.
 
 The static check needs no API key. The `-complex-mc` check calls the
 AI, so set `ANTHROPIC_API_KEY` (or `AGHAST_LOCAL_CLAUDE=true`) first,
@@ -261,10 +262,3 @@ understanding — following a reference into another file, applying
 conditional logic, reasoning about configurations that vary in
 structure. The skill is recognising which side of that line a policy
 sits on *before* you write 170 lines of YAML.
-
-## Sample solution
-
-Both checks are already in `solution/` (Layer 1 registry plus the
-two check folders). `solution/checks/aghast-nginx-vhost-protection-complex-mc/EXAMPLE-NOTES.md`
-expands on the maintenance/fragility trade-off. Copy the folder
-elsewhere if you want a clean slate to write the checks yourself.

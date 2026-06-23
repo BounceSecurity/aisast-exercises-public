@@ -24,6 +24,13 @@ flagged either way.
 You are not required to read the target before writing the prompt — but
 do skim `src/audit.js` to know what an audit call looks like.
 
+Key information:
+
+- Sensitive db operations (which mutate state) include: `deleteUserById`, `setUserRole`, `resetUserPassword`, `transferFunds` in the `db` module.
+- Read-only handlers operations (which do not need logging in this use case) are: `listUsers`, `getBalance`.
+
+Handlers including mutations need to call `auditLog.write({...})` (from `src/audit.js`) to perform the logging.
+
 ## Constraints
 
 - The check must be of type `repository` (no `checkTarget` field in
@@ -54,6 +61,7 @@ Running, from inside the exercise folder:
 ```powershell
 aghast scan target --config-dir <your-solution-dir>
 ```
+If you set your AI provider in the runtime-config.json file you need to add `--runtime-config <path-to-runtime-config.json>` to your command.
 
 ...reports `FAIL` with **exactly three issues**, one for each of:
 
@@ -69,8 +77,3 @@ If the AI flags a clean handler, your prompt is too loose — tighten the
 out-of-scope. If the AI misses a buggy one, your prompt is too narrow —
 broaden the list of db functions that count as sensitive mutations.
 Iterate.
-
-## Sample solution
-
-A working solution is in `solution/`. Try the exercise first; peek when
-you're stuck or when you're done and want to compare.

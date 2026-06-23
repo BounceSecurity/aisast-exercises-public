@@ -26,8 +26,7 @@ cross-file reasoning can tell them apart.
 - Read `middleware/auth.js` first — it tells you where the trusted
   role lives (`req.user.role`).
 - There are six routes. Three are clean. Two are real bugs. One is
-  a red herring. Don't peek at the solution prompt before deciding
-  which is which.
+  a red herring.
 - A purely pattern-matching rule would either flag every
   `req.body.role` (false positives on the red herring) or none
   (false negatives on the real bug). The whole point of using AI
@@ -44,8 +43,9 @@ Running, from inside the exercise folder:
 ```powershell
 aghast scan target --config-dir solution
 ```
+If you set your AI provider in the runtime-config.json file you need to add `--runtime-config <path-to-runtime-config.json>` to your command.
 
-reports **status `FAIL`** with issues in **`routes/team.js`** AND
+reports **status `FAIL`** with exactly two issues, one in **`routes/team.js`** and one in
 **`routes/settings.js`** — and does NOT flag `routes/admin.js`,
 `routes/billing.js`, `routes/projects.js`, or `routes/profile.js`.
 
@@ -67,8 +67,3 @@ settings route, you probably forgot to call out
   rule. When would you use one vs the other? Could you chain them
   (Semgrep finds candidates, AI validates) using a `targeted` check?
   That's exactly Exercise 05.
-
-## Sample solution
-
-A working markdown prompt + check definition is in `solution/`. Try
-your own first; compare afterwards.

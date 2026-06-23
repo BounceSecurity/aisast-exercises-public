@@ -54,15 +54,16 @@ should be flagged. Then we'll write the rule.
 You could try this:
 
 ```yaml
-- id: dumb-sqli
-  languages: [python]
-  severity: ERROR
-  pattern: db.execute($X)
+rules:
+  - id: dumb-sqli
+    languages: [python]
+    severity: ERROR
+    message: db.execute is called
+    pattern: db.execute(...)
 ```
 
-Run it. Every `db.execute` lights up — including the safe
-parameterised one. A simple AST pattern can't tell where `$X`
-*came from*. We need a rule that follows the **flow** of values from
+Run it. Every `db.execute` lights up (4 findings) — including the safe
+parameterised one. A simple AST pattern cannot tell how parameters are used internally or where they *came from*. We need a rule that follows the **flow** of values from
 a source to a sink.
 
 ## Step 2 — Set up taint mode
@@ -101,8 +102,8 @@ Run it:
 semgrep --config solution/checks/aghast-flask-sqli-taint/aghast-flask-sqli-taint.yaml target/
 ```
 
-You should see findings in `users.py`, `reports.py:21`, **and**
-`products.py`. The first two are correct. The third is a false
+You should see findings in `users.py:19`, `reports.py:14 & 21`, and
+`products.py:13`. The first two are correct. The third is a false
 positive — `name` is reaching `db.execute` only as a param, not as
 SQL. We'll fix it next.
 
@@ -124,7 +125,7 @@ it:
           - focus-metavariable: $SQL
 ```
 
-Re-run. `products.py` is gone — taint is no longer interested in
+Re-run. `products.py` is gone (3 left) — taint is no longer interested in
 data flowing into the params position.
 
 > Note the structure: `pattern-sinks:` is a list, each entry is an

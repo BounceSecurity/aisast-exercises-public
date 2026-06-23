@@ -112,8 +112,7 @@ file, plus the prompt. So the prompt needs to:
    allowlist count; `parseFloat` alone does not" is enforceable.
 4. Tell it the verdict format: empty `issues` for OK, one issue for BAD.
 
-See `solution/checks/aghast-payment-input-validation/aghast-payment-input-validation.md`
-for the full prompt — under 40 lines, deliberately. Long prompts drift.
+Keep it under 40 lines — long prompts drift.
 
 ## Step 5 — Run the scan
 
@@ -148,8 +147,3 @@ Open `target/security_checks_results.json`. Expected:
 - **`parseFloat` was a deliberate trap.** A weaker prompt will mark
   `donate-bad.js` as fine because "the code converts to a number".
   Spelling out "coercion is not validation" in the prompt fixes it.
-
-## Sample solution
-
-Already in `solution/`. Wipe it and rebuild from scratch if you want
-the full exercise.

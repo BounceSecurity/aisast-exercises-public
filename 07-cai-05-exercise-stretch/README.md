@@ -47,8 +47,3 @@ attacker-influenced.
 
 …and zero issues for `src/safe-eval-formula.js`,
 `src/rotate-logs-safe.js`, `src/sandbox-safe.js`.
-
-## Sample solution
-
-If you get stuck, look at `solution/`. Wipe it before you start if you
-want a clean slate.

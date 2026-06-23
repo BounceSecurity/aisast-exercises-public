@@ -252,7 +252,8 @@ From inside the exercise folder:
 ```powershell
 aghast scan target --config-dir solution
 ```
-
+If you set your AI provider in the runtime-config.json file you need to add `--runtime-config <path-to-runtime-config.json>` to your command.
+s
 The static check needs no API key. The `-mc` check calls the AI, so
 set `ANTHROPIC_API_KEY` (or `AGHAST_LOCAL_CLAUDE=true`) before
 running, or it will report `ERROR`.
@@ -305,11 +306,3 @@ candidates, then spend AI tokens only on the judgement Semgrep
 cannot make. Here the judgement ("count ≥ 2") is simple enough that
 Semgrep can also do it — so the static check wins. The skill is
 recognising which side of that line a given policy falls on.
-
-## Sample solution
-
-Both checks are already in `solution/` (Layer 1 registry plus the
-two check folders). `solution/checks/aghast-nginx-vhost-protection-mc/EXAMPLE-NOTES.md`
-walks through the same static-vs-AI trade-off and points at the
-complex follow-up. Copy the folder elsewhere if you want a clean
-slate to write the checks yourself.

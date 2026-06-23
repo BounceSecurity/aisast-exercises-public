@@ -64,8 +64,8 @@ the cross-file tracing for us.
 
 ## Step 2 — Sketch the prompt
 
-Open `solution/checks/aghast-pii-leak/aghast-pii-leak.md`. Notice
-the structure:
+Create `solution/checks/aghast-pii-leak/aghast-pii-leak.md`. Use
+the following structure:
 
 1. **Sink.** Name the function. Give the file. Tell the AI which
    argument is the data leaving the trust boundary.
@@ -140,6 +140,7 @@ From inside the exercise folder (`ANTHROPIC_API_KEY` must be set):
 ```powershell
 aghast scan target --config-dir solution
 ```
+If you set your AI provider in the runtime-config.json file you need to add `--runtime-config <path-to-runtime-config.json>` to your command.
 
 Expect: status `FAIL`, exactly two issues, both in the `routes/`
 folder — `support.js` (raw user) and `analytics.js` (via
@@ -162,8 +163,3 @@ folder — `support.js` (raw user) and `analytics.js` (via
 - **Cost vs Semgrep.** This check costs real money per scan. Run it
   on PRs where files in `routes/` or `services/` change, not on every
   commit.
-
-## Sample solution
-
-Already in `solution/`. Copy `solution/` somewhere else if you'd like
-a clean slate to write the prompt yourself.

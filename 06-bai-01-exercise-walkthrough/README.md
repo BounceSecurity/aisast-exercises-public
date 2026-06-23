@@ -190,8 +190,3 @@ Verify that no other file (especially `users.js`, which uses only
 - **Cost vs. Semgrep.** Each `repository` scan costs API tokens. Use
   `repository` checks when cross-file reasoning is needed; use Semgrep
   (Exercise 01) when a syntactic match is enough.
-
-## Sample solution
-
-Already in `solution/`. Copy it elsewhere if you want a clean slate to
-write the check yourself.

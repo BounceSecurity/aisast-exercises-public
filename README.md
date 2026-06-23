@@ -80,11 +80,25 @@ vocabulary.
 
 **Configuring an AI model.** The AI-backed exercises call a model once per
 target, and you supply your **own** provider and model. Set
-`agentProvider.name` and `agentProvider.model` in `runtime-config.json`
+`agentProvider.name` (openai or opencode) and `agentProvider.model` (for example opencode/nemotron-3-ultra-free or openai/gpt-5.5) in `runtime-config.json`
+
+`runtime-config.json`:
+
+```bash
+{
+  "agentProvider": {
+    "name": "...",
+    "model": "..."
+  }
+}
+```
+
 and pass it on the scan with `--runtime-config <path>`; or set
 `ANTHROPIC_API_KEY` (and `--model <id>`); or set `AGHAST_LOCAL_CLAUDE=true`
 to use a local Claude CLI. `07-cai-01` ships a pre-generated SARIF report,
 so it needs an AI model but **not** Semgrep.
+
+If you are not sure about the model name or what models are available when using opencode agent provider, run a scan with the correct model prefix but an incorrect model name (e.g. `"model": "openai/junk"`) and look at the error output which will contain the list of possible models.
 
 Run `git status` inside any target before you scan it — the targets must
 be git repos so AGHAST can attach repo metadata and Semgrep can scope to

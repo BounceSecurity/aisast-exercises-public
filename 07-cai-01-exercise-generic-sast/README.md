@@ -144,6 +144,9 @@ full prompt sent per finding.
 - Overall status `FAIL` (some findings are confirmed real).
 - Each target returns a verdict with reasoning: a confirmed finding
   becomes an issue; a false positive returns an empty issue array.
+- In the SARIF results, `codeFlows` indicates a true positive
+  (the finding has a real flow), while `suppressions` indicates a false
+  positive / suppressed finding.
 
 Open the SARIF/JSON report and read the reasoning per finding. The point
 of the exercise is the **last** judgement: line the AI's verdicts up
@@ -166,11 +169,3 @@ where generic SAST + AI triage is strong and where it needs help.
 - **`ERROR` status, no verdicts** — no provider/model is configured. See
   Step 4: set `agentProvider` in `../runtime-config.json` and pass it with
   `--runtime-config`.
-
-## Sample solution
-
-A working config-dir is already in `solution/`. The intended answer key
-(which findings are true vs. false positives, and why) is in
-`solution/checks/sarif-accuracy/EXAMPLE-NOTES.md` — don't open it until
-you've formed your own verdicts. Wipe `solution/checks/` and rebuild it
-from scratch if you want the full exercise.

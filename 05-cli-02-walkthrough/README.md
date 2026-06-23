@@ -38,10 +38,10 @@ the first two and ignore the third.
 ## Step 1 — Sanity-check Semgrep with a literal pattern
 
 Before writing a rule file, prove that Semgrep can find the call. From
-the `target/` directory:
+the exercise directory:
 
 ```powershell
-semgrep --lang js --pattern 'crypto.createHash("md5")' src/
+semgrep --lang js --pattern 'crypto.createHash("md5")' target/src/
 ```
 
 You should see one match in `hash-password.js` and one in
@@ -54,16 +54,16 @@ metavariable (`$NAME`, written in capitals) lets the pattern match any
 expression in that position:
 
 ```powershell
-semgrep --lang js --pattern 'crypto.createHash($ALGO)' src/
+semgrep --lang js --pattern 'crypto.createHash($ALGO)' target/src/
 ```
 
-Now you'll match three calls — including the safe `sha256`. We'll
+Now you'll match four calls — including the safe `sha256`. We'll
 filter that out next.
 
 ## Step 3 — Constrain `$ALGO` with `metavariable-regex`
 
 Patterns combined with constraints have to live in a YAML rule file.
-Create `solution/checks/aghast-weak-hash/aghast-weak-hash.yaml`:
+Create `solution/checks/aghast-weak-hash/aghast-weak-hash.yaml` under the exercise directory:
 
 ```yaml
 rules:
@@ -84,13 +84,13 @@ Notes:
   include the quotes and the `(?i)` for case-insensitivity.
 - `patterns:` (plural) ANDs its children. Every child must match.
 
-Run it:
+Run it from the exercise directory:
 
 ```powershell
-semgrep --config solution/checks/aghast-weak-hash/aghast-weak-hash.yaml src/
+semgrep --config solution/checks/aghast-weak-hash/aghast-weak-hash.yaml target/src/
 ```
 
-You should see exactly two findings — both in `hash-password.js`. The
+You should see exactly three findings — two in `hash-password.js` and one in `cache-key.js`. The
 sha256 in `token.js` is filtered out by the regex.
 
 ## Step 4 — Wrap the rule as an AGHAST check
@@ -153,8 +153,8 @@ From the exercise directory:
 aghast scan target --config-dir solution
 ```
 
-Expected output: status `FAIL`, with two issues — both pointing at
-`src/hash-password.js`. Open the JSON report (default
+Expected output: status `FAIL`, with three issues — two pointing at
+`src/hash-password.js` and one at `src/cache-key.js`. Open the JSON report (default
 `security_checks_results.json` in the target dir) to confirm.
 
 ## Discussion
