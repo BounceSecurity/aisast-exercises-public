@@ -1,0 +1,13 @@
+rules:
+  - id: aghast-weak-hash
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >
+      `crypto.createHash` called with the broken algorithm `$ALGO`.
+      Use `sha256` (or stronger) for fingerprints and `bcrypt` /
+      `scrypt` / `argon2` for passwords.
+    patterns:
+      - pattern: crypto.createHash($ALGO)
+      - metavariable-regex:
+          metavariable: $ALGO
+          regex: ^["'](?i)(md5|sha1)["']$

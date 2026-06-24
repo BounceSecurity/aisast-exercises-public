@@ -1,0 +1,9 @@
+{
+  "checks": [
+    {
+      "id": "aghast-weak-hash",
+      "repositories": [],
+      "enabled": true
+    }
+  ]
+}

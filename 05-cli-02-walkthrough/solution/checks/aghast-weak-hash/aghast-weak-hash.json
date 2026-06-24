@@ -1,0 +1,11 @@
+{
+  "id": "aghast-weak-hash",
+  "name": "Weak hash algorithm",
+  "severity": "high",
+  "confidence": "high",
+  "checkTarget": {
+    "type": "static",
+    "discovery": "semgrep",
+    "rules": "aghast-weak-hash.yaml"
+  }
+}
